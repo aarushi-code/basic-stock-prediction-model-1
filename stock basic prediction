@@ -1,0 +1,39 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import quandl, math
+import numpy as np
+from sklearn import linear_model
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+
+df =quandl.get('WIKI/GOOGL')
+
+df['HL_change'] = (df['Adj. High'] - df['Adj. Close']) / df['Adj. Close'] * 100.0
+df['P_change'] = (df['Adj. Close'] - df['Adj. Open']) / df['Adj. Open'] * 100.0
+df = df[['Adj. Close','Adj. Volume','Adj. Open','P_change','HL_change']]
+
+forecast_col = 'Adj. Close'
+df.fillna(-99999, inplace=True)
+
+forecast_out = int(math.ceil(0.01*len(df)))
+
+df['label'] = df[forecast_col].shift(-forecast_out)
+df.dropna(inplace=True)
+
+X = np.array(df.drop(['label'],1))
+Y = np.array(df['label'])
+X=preprocessing.scale(X)
+Y = np.array(df['label'])
+
+X_train, X_test, Y_train, Y_test = train_test_split(df, Y, test_size=0.2)
+
+clf = LinearRegression()
+print (X_train.shape, Y_train.shape)
+print (X_test.shape, Y_test.shape)
+lm = linear_model.LinearRegression()
+model = lm.fit(X_train, Y_train)
+predictions = lm.predict(X_test)
+
+plt.scatter(Y_test, predictions)
+plt.xlabel('forecast_col')
+plt.ylabel('forecast_out')
